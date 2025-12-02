@@ -32,3 +32,52 @@ pub fn solve_part1(input: &Vec<i32>) -> u32 {
     }
     landed_on_zero
 }
+
+#[aoc(day1, part2)]
+pub fn solve_part2(input: &Vec<i32>) -> u32 {
+    let mut pointed_at_zero = 0;
+    let mut c = 50;
+    for mut n in input.to_owned() {
+        if n.is_negative() {
+            pointed_at_zero += (n / 100).abs() as u32;
+            n = n % 100;
+            c = (c + n) % 100;
+            if c.is_negative() {
+                if c != n {
+                    pointed_at_zero += 1;
+                }
+                c += 100;
+            }
+            c = c % 100;
+            if c == 0 {
+                pointed_at_zero += 1;
+            }
+        } else {
+            c += n;
+            pointed_at_zero += (c / 100) as u32;
+            c = c % 100;
+        }
+    }
+    pointed_at_zero
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_part2() {
+        let input = r"L68
+L30
+R48
+L5
+R60
+L55
+L1
+L99
+R14
+L82";
+        let input = input_generator(input);
+        assert_eq!(solve_part2(&input), 6);
+    }
+}
