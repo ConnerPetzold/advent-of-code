@@ -1,4 +1,5 @@
 use aoc_runner_derive::{aoc, aoc_generator};
+use itertools::Itertools;
 use nom::{
     Parser,
     character::complete::{self, satisfy},
@@ -21,27 +22,35 @@ fn single_digit(input: &str) -> nom::IResult<&str, u32> {
     .parse(input)
 }
 
-#[aoc(day3, part1)]
-pub fn solve_part1(input: &Vec<Vec<u32>>) -> u32 {
-    input
-        .to_owned()
-        .into_iter()
-        .map(|row| {
-            let mut first = 0;
-            // let mut first_index = 0;
-            let mut second = 0;
-            let len = row.len();
-            for (i, num) in row.into_iter().enumerate() {
-                if i < len - 1 && num > first {
-                    first = num;
-                    second = 0;
-                } else if i > 0 {
-                    second = second.max(num);
+fn concat(digits: &Vec<u32>) -> u64 {
+    digits.iter().fold(0, |acc, elem| acc * 10 + *elem as u64)
+}
+
+fn get_joltage(bank: &Vec<u32>, num_batteries: usize) -> u64 {
+    let mut batteries = vec![0u32; num_batteries];
+    for i in 0..bank.len() - num_batteries + 1 {
+        for j in 0..num_batteries {
+            let num = bank[i + j];
+            if num > batteries[j] {
+                batteries[j] = num;
+                for k in j + 1..num_batteries {
+                    batteries[k] = 0;
                 }
             }
-            first * 10 + second
-        })
-        .sum()
+        }
+    }
+
+    concat(&batteries)
+}
+
+#[aoc(day3, part1)]
+pub fn solve_part1(input: &Vec<Vec<u32>>) -> u64 {
+    input.iter().map(|bank| get_joltage(bank, 2)).sum()
+}
+
+#[aoc(day3, part2)]
+pub fn solve_part2(input: &Vec<Vec<u32>>) -> u64 {
+    input.iter().map(|bank| get_joltage(bank, 12)).sum()
 }
 
 #[cfg(test)]
