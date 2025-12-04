@@ -8,6 +8,7 @@ version = "0.1.0"
 dependencies = [
  "aoc-runner",
  "aoc-runner-derive",
+ "gridit",
  "itertools",
  "nom",
 ]
@@ -46,6 +47,12 @@ name = "either"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
+
+[[package]]
+name = "gridit"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e955d1c01b03319db7796a86a8a0d9c5a9c5238f362c26a7d55cf8f39a5c468"
 
 [[package]]
 name = "itertools"
