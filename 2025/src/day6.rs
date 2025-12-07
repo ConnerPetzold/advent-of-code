@@ -28,7 +28,7 @@ impl Problem {
 }
 
 #[aoc_generator(day6, part1)]
-pub fn input_generator_part_1(input: &str) -> Vec<Problem> {
+fn input_generator_part_1(input: &str) -> Vec<Problem> {
     let (nums, ops) = separated_pair(
         separated_list1(
             complete::newline::<&str, nom::error::Error<&str>>,
@@ -69,7 +69,7 @@ pub fn input_generator_part_1(input: &str) -> Vec<Problem> {
 }
 
 #[aoc_generator(day6, part2)]
-pub fn input_generator_part_2(input: &str) -> Vec<Problem> {
+fn input_generator_part_2(input: &str) -> Vec<Problem> {
     let lines = input
         .lines()
         .map(|line| line.to_string())
@@ -113,12 +113,12 @@ pub fn input_generator_part_2(input: &str) -> Vec<Problem> {
 }
 
 #[aoc(day6, part1)]
-pub fn solve_part1(problems: &Vec<Problem>) -> u64 {
+fn solve_part1(problems: &Vec<Problem>) -> u64 {
     problems.iter().map(|problem| problem.solve()).sum()
 }
 
 #[aoc(day6, part2)]
-pub fn solve_part2(problems: &Vec<Problem>) -> u64 {
+fn solve_part2(problems: &Vec<Problem>) -> u64 {
     problems.iter().map(|problem| problem.solve()).sum()
 }
 
