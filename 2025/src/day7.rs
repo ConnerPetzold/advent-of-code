@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use aoc_runner_derive::{aoc, aoc_generator};
 use glam::{UVec2, uvec2};
+use pathfinding::prelude::{bfs_reach, count_paths};
 
 #[derive(Debug, Clone)]
 struct Manifold {
@@ -11,29 +12,44 @@ struct Manifold {
 }
 
 impl Manifold {
-    fn num_times_split(&self) -> usize {
-        let mut count = 0;
-        let mut beams = HashSet::new();
-        beams.insert(self.start);
+    fn times_split(&self) -> usize {
+        bfs_reach(self.start, |&pos| {
+            let beams = if self.splitters.contains(&pos) {
+                vec![pos + UVec2::X, pos - UVec2::X]
+            } else {
+                vec![pos]
+            };
 
-        while !beams.is_empty() {
-            let mut new_beams = HashSet::new();
-            for beam in beams.clone().iter() {
-                let next = beam + UVec2::Y;
+            beams.into_iter().filter_map(|beam| {
+                let mut next = beam + UVec2::Y;
 
-                if self.splitters.contains(&next) {
-                    count += 1;
-                    beams.remove(beam);
-                    new_beams.insert(next + UVec2::X);
-                    new_beams.insert(next - UVec2::X);
-                } else if next.y < self.size.y {
-                    new_beams.insert(next);
+                while next.y < self.size.y {
+                    if self.splitters.contains(&next) {
+                        return Some(next);
+                    }
+                    next += UVec2::Y;
                 }
-            }
-            beams = new_beams;
-        }
 
-        count
+                None
+            })
+        })
+        .count()
+            - 1
+    }
+
+    fn timelines(&self) -> usize {
+        count_paths(
+            self.start,
+            |&pos| {
+                let next = pos + UVec2::Y;
+                if self.splitters.contains(&next) {
+                    vec![pos + UVec2::X, pos - UVec2::X].into_iter()
+                } else {
+                    vec![next].into_iter()
+                }
+            },
+            |&pos| pos.y == self.size.y,
+        )
     }
 }
 
@@ -67,7 +83,12 @@ fn input_generator(input: &str) -> Manifold {
 
 #[aoc(day7, part1)]
 fn solve_part1(manifold: &Manifold) -> usize {
-    manifold.num_times_split()
+    manifold.times_split()
+}
+
+#[aoc(day7, part2)]
+fn solve_part2(manifold: &Manifold) -> usize {
+    manifold.timelines()
 }
 
 #[cfg(test)]
@@ -94,5 +115,27 @@ mod tests {
 ...............";
         let input = input_generator(input);
         assert_eq!(solve_part1(&input), 21);
+    }
+
+    #[test]
+    fn test_part2() {
+        let input = r".......S.......
+...............
+.......^.......
+...............
+......^.^......
+...............
+.....^.^.^.....
+...............
+....^.^...^....
+...............
+...^.^...^.^...
+...............
+..^...^.....^..
+...............
+.^.^.^.^.^...^.
+...............";
+        let input = input_generator(input);
+        assert_eq!(solve_part2(&input), 40);
     }
 }

@@ -2,7 +2,7 @@ use aoc_runner_derive::{aoc, aoc_generator};
 use nom::{
     Parser,
     character::complete::{self, one_of, u64},
-    multi::{separated_list0, separated_list1},
+    multi::separated_list1,
     sequence::{preceded, separated_pair, terminated},
 };
 
