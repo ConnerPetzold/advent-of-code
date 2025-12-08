@@ -7,7 +7,10 @@ use nom::{
     character::complete::{i64, newline},
     multi::{separated_list0, separated_list1},
 };
-use petgraph::{algo::kosaraju_scc, graph::UnGraph};
+use petgraph::{
+    algo::{connected_components, kosaraju_scc},
+    graph::UnGraph,
+};
 
 #[aoc_generator(day8)]
 pub fn input_generator(input: &str) -> Vec<I64Vec3> {
@@ -22,28 +25,39 @@ fn parse_vec3(input: &str) -> nom::IResult<&str, I64Vec3> {
 
 #[aoc(day8, part1)]
 pub fn solve_part1(points: &[I64Vec3]) -> usize {
-    let graph = circuit_graph(points, 1000);
+    let (graph, _) = circuit_graph(points, 1000);
     let circuits = circuits(&graph);
     circuits.iter().map(|c| c.len()).take(3).product()
 }
 
-fn circuit_graph(points: &[I64Vec3], min_edges: usize) -> UnGraph<I64Vec3, ()> {
+#[aoc(day8, part2)]
+pub fn solve_part2(points: &[I64Vec3]) -> i64 {
+    let (_, distance) = circuit_graph(points, 499500);
+    distance
+}
+
+fn circuit_graph(points: &[I64Vec3], min_edges: usize) -> (UnGraph<I64Vec3, ()>, i64) {
     let mut graph = UnGraph::default();
 
     let node_indices: Vec<_> = points.iter().map(|&p| graph.add_node(p)).collect();
 
-    for (i, j) in points
+    let mut longest_distance = 0;
+
+    for ((i, a), (j, b)) in points
         .iter()
         .enumerate()
         .tuple_combinations()
         .sorted_by_key(|((_, a), (_, b))| a.distance_squared(**b))
-        .map(|((i, _), (j, _))| (i, j))
         .take(min_edges)
     {
         graph.add_edge(node_indices[i], node_indices[j], ());
+        longest_distance = a.x * b.x;
+        if connected_components(&graph) == 1 {
+            break;
+        }
     }
 
-    graph
+    (graph, longest_distance)
 }
 
 fn circuits(graph: &UnGraph<I64Vec3, ()>) -> Vec<Vec<I64Vec3>> {
