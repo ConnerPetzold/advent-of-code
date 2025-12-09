@@ -95,7 +95,7 @@ mod tests {
 984,92,344
 425,690,689";
         let input = input_generator(input);
-        let graph = circuit_graph(&input, 10);
+        let (graph, _) = circuit_graph(&input, 10);
         let circuits = circuits(&graph);
         let result: usize = circuits.iter().map(|c| c.len()).take(3).product();
         assert_eq!(result, 40);
