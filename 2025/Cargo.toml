@@ -10,6 +10,7 @@ bench = false
 aoc-runner = "0.3.0"
 aoc-runner-derive = "0.3.0"
 glam = "0.30.9"
+good_lp = { version = "1.14.2", features = ["highs"] }
 gridit = "0.1.0"
 itertools = "0.14.0"
 nom = "8.0.0"

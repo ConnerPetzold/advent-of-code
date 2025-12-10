@@ -1,4 +1,7 @@
 use aoc_runner_derive::{aoc, aoc_generator};
+use good_lp::{
+    Expression, IntoAffineExpression as _, Solution as _, SolverModel, highs, variable, variables,
+};
 use itertools::Itertools;
 use nom::{
     Parser,
@@ -16,7 +19,7 @@ struct Machine {
 }
 
 impl Machine {
-    fn min_sequence(&self) -> Vec<&Vec<usize>> {
+    fn min_sequence_for_light_diagram(&self) -> Vec<&Vec<usize>> {
         self.wiring_schematics
             .iter()
             .powerset()
@@ -39,6 +42,32 @@ impl Machine {
             })
             .min_by_key(|sequence| sequence.len())
             .unwrap()
+    }
+
+    fn min_sequence_for_joltage_requirements(&self) -> usize {
+        let mut vars = variables!();
+        let press_vars: Vec<_> = (0..self.wiring_schematics.len())
+            .map(|_| vars.add(variable().min(0).integer()))
+            .collect();
+
+        let mut problem = highs(vars.minimise(press_vars.iter().sum::<Expression>()));
+
+        let mut exprs = vec![0.into_expression(); self.joltage_requirements.len()];
+        for (i, schematic) in self.wiring_schematics.iter().enumerate() {
+            for &x in schematic {
+                if x < exprs.len() {
+                    exprs[x] += press_vars[i];
+                }
+            }
+        }
+
+        for (e, &j) in exprs.into_iter().zip(self.joltage_requirements.iter()) {
+            problem.add_constraint(e.eq(j as f64));
+        }
+
+        let sol = problem.solve().unwrap();
+
+        press_vars.iter().map(|&v| sol.value(v)).sum::<f64>() as _
     }
 }
 
@@ -81,22 +110,26 @@ fn parse_wiring_schematics(input: &str) -> nom::IResult<&str, Vec<Vec<usize>>> {
 }
 
 fn parse_wiring_schematic(input: &str) -> nom::IResult<&str, Vec<usize>> {
-    delimited(tag("("), separated_list1(tag(","), usize), tag(")"))
-        .parse(input)
-        .map(|(s, wiring_schematic)| (s, wiring_schematic.iter().map(|w| *w).collect()))
+    delimited(tag("("), separated_list1(tag(","), usize), tag(")")).parse(input)
 }
 
 fn parse_joltage_requirements(input: &str) -> nom::IResult<&str, Vec<usize>> {
-    delimited(tag("{"), separated_list1(tag(","), usize), tag("}"))
-        .parse(input)
-        .map(|(s, joltage_requirements)| (s, joltage_requirements.iter().map(|w| *w).collect()))
+    delimited(tag("{"), separated_list1(tag(","), usize), tag("}")).parse(input)
 }
 
 #[aoc(day10, part1)]
-pub fn solve_part1(machines: &[Machine]) -> usize {
+fn solve_part1(machines: &[Machine]) -> usize {
     machines
         .iter()
-        .map(|machine| machine.min_sequence().len())
+        .map(|machine| machine.min_sequence_for_light_diagram().len())
+        .sum()
+}
+
+#[aoc(day10, part2)]
+fn solve_part2(machines: &[Machine]) -> usize {
+    machines
+        .iter()
+        .map(|machine| machine.min_sequence_for_joltage_requirements())
         .sum()
 }
 
@@ -120,5 +153,15 @@ mod tests {
         let input = input_generator(input);
         let result = solve_part1(&input);
         assert_eq!(result, 5);
+    }
+
+    #[test]
+    fn test_part2() {
+        let input = r"[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
+[...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}
+[.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}";
+        let input = input_generator(input);
+        let result = solve_part2(&input);
+        assert_eq!(result, 33);
     }
 }
