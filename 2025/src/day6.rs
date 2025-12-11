@@ -113,12 +113,12 @@ fn input_generator_part_2(input: &str) -> Vec<Problem> {
 }
 
 #[aoc(day6, part1)]
-fn solve_part1(problems: &Vec<Problem>) -> u64 {
+fn solve_part1(problems: &[Problem]) -> u64 {
     problems.iter().map(|problem| problem.solve()).sum()
 }
 
 #[aoc(day6, part2)]
-fn solve_part2(problems: &Vec<Problem>) -> u64 {
+fn solve_part2(problems: &[Problem]) -> u64 {
     problems.iter().map(|problem| problem.solve()).sum()
 }
 

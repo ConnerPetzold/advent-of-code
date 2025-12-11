@@ -34,13 +34,13 @@ pub fn solve_part1(input: &Vec<i32>) -> u32 {
 }
 
 #[aoc(day1, part2)]
-pub fn solve_part2(input: &Vec<i32>) -> u32 {
+pub fn solve_part2(input: &[i32]) -> u32 {
     let mut pointed_at_zero = 0;
     let mut c = 50;
-    for mut n in input.to_owned() {
+    for mut n in input.iter().copied() {
         if n.is_negative() {
-            pointed_at_zero += (n / 100).abs() as u32;
-            n = n % 100;
+            pointed_at_zero += (n / 100).unsigned_abs();
+            n %= 100;
             c = (c + n) % 100;
             if c.is_negative() {
                 if c != n {
@@ -48,14 +48,14 @@ pub fn solve_part2(input: &Vec<i32>) -> u32 {
                 }
                 c += 100;
             }
-            c = c % 100;
+            c %= 100;
             if c == 0 {
                 pointed_at_zero += 1;
             }
         } else {
             c += n;
             pointed_at_zero += (c / 100) as u32;
-            c = c % 100;
+            c %= 100;
         }
     }
     pointed_at_zero

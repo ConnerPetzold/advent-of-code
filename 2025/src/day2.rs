@@ -26,10 +26,10 @@ pub fn input_generator(input: &str) -> Vec<Range<u64>> {
 }
 
 #[aoc(day2, part1)]
-pub fn solve_part1(input: &Vec<Range<u64>>) -> u64 {
+pub fn solve_part1(input: &[Range<u64>]) -> u64 {
     let mut invalid_ids = Vec::new();
-    for range in input.clone() {
-        for id in range {
+    for range in input {
+        for id in range.clone() {
             if !is_valid_id(id) {
                 invalid_ids.push(id);
             }
@@ -45,10 +45,10 @@ fn is_valid_id(id: u64) -> bool {
 }
 
 #[aoc(day2, part2)]
-pub fn solve_part2(input: &Vec<Range<u64>>) -> u64 {
+pub fn solve_part2(input: &[Range<u64>]) -> u64 {
     let mut invalid_ids = Vec::new();
-    for range in input.clone() {
-        for id in range {
+    for range in input {
+        for id in range.clone() {
             if !is_valid_id_part2(id) {
                 invalid_ids.push(id);
             }
@@ -61,7 +61,7 @@ fn is_valid_id_part2(id: u64) -> bool {
     let s = id.to_string();
     let len = s.len();
     for n in 1..=len / 2 {
-        if len % n != 0 {
+        if !len.is_multiple_of(n) {
             continue;
         }
         let sub = s.chars().take(n).collect::<String>();
