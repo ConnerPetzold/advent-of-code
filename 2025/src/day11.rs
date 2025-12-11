@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use aoc_runner_derive::{aoc, aoc_generator};
-use itertools::Itertools;
 use nom::{
     Parser,
     bytes::complete::tag,
@@ -9,7 +8,7 @@ use nom::{
     multi::separated_list1,
     sequence::separated_pair,
 };
-use pathfinding::prelude::{bfs_reach, count_paths};
+use pathfinding::prelude::count_paths;
 
 #[aoc_generator(day11)]
 fn input_generator(input: &str) -> HashMap<String, Vec<String>> {
@@ -40,6 +39,23 @@ fn solve_part1(devices: &HashMap<String, Vec<String>>) -> usize {
     )
 }
 
+#[aoc(day11, part2)]
+fn solve_part2(devices: &HashMap<String, Vec<String>>) -> usize {
+    count_paths(
+        "svr".to_string(),
+        |id| devices.get(id).cloned().unwrap_or_default(),
+        |id| id == "fft",
+    ) * count_paths(
+        "fft".to_string(),
+        |id| devices.get(id).cloned().unwrap_or_default(),
+        |id| id == "dac",
+    ) * count_paths(
+        "dac".to_string(),
+        |id| devices.get(id).cloned().unwrap_or_default(),
+        |id| id == "out",
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -59,5 +75,25 @@ iii: out";
         let input = input_generator(input);
         let result = solve_part1(&input);
         assert_eq!(result, 5);
+    }
+
+    #[test]
+    fn test_part2() {
+        let input = r"svr: aaa bbb
+aaa: fft
+fft: ccc
+bbb: tty
+tty: ccc
+ccc: ddd eee
+ddd: hub
+hub: fff
+eee: dac
+dac: fff
+fff: ggg hhh
+ggg: out
+hhh: out";
+        let input = input_generator(input);
+        let result = solve_part2(&input);
+        assert_eq!(result, 2);
     }
 }
